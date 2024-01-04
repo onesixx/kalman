@@ -6,16 +6,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 np.random.seed(666)
-
-firstRun = True
-A, H, Q, R = 0, 0, 0, 0
-x, P = 0, 0  # x : Previous State Variable Estimation, P : Error Covariance Estimation
-
 # ------ measure volt and noise
 def getVolt(volt_true = 14.4):
     v = np.random.normal(0, 2)
     z_volt_meas = volt_true + v
     return z_volt_meas
+
+
+
+firstRun = True
+x, P = 0, 0  # x : Previous State Variable Estimation, P : Error Covariance Estimation
+A, H = 0, 0
+Q, R = 0, 0
 
 # ------ Kalman Filter for 1 variable
 def calcSimpleKalman(z):
@@ -29,14 +31,15 @@ def calcSimpleKalman(z):
         x = 14   # initial estimated value
         P = 6
         firstRun = False
-    x_pred = A*x                       # x_pred : State Variable [Prediction]
-    P_pred = A*P*A + Q                 # Error Covariance [Prediction]
+    else:
+        x_pred = A*x                       # x_pred : State Variable [Prediction]
+        P_pred = A*P*A + Q                 # Error Covariance [Prediction]
 
-    K = (P_pred*H) / (H*P_pred*H + R)  # K : Kalman Gain
+        K = (P_pred*H) / (H*P_pred*H + R)  # K : Kalman Gain
 
-    x = x_pred + K*(z - H*x_pred)      # Update State Variable [Estimation]
+        x = x_pred + K*(z - H*x_pred)      # Update State Variable [Estimation]
 
-    P = P_pred - K*H*P_pred            # Update Error Covariance [Estimation]
+        P = P_pred - K*H*P_pred            # Update Error Covariance [Estimation]
     
     return x, K, P
 
@@ -68,6 +71,7 @@ plt.plot(time, volt_esti_save, 'ro', label='Kalman Filter')
 plt.legend(loc='upper left')
 plt.ylabel('Volt [V]')
 plt.xlabel('Time [sec]')
+plt.title("Measurements v.s. Estimation (Kalman Filter)")
 #plt.savefig('result/08_SimpleExample.png')
 
 plt.figure()
