@@ -38,11 +38,11 @@ def getSonar(i):
 
 
 for k in range(0, Nsamples):
-    xm = getSonar(k)
-    x = MovAvgFilter_batch(xm)
+    x_measured = getSonar(k)
+    x_estimated = MovAvgFilter_batch(x_measured)
 
-    Xsaved[k] = x
-    Xmsaved[k] = xm
+    Xsaved[k] = x_estimated
+    Xmsaved[k] = x_measured
 
 dt = 0.02
 time = np.arange(0, Nsamples*dt, dt)

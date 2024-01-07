@@ -7,37 +7,38 @@
 import numpy as np
 from numpy.linalg import inv
 import matplotlib.pyplot as plt
-import io
+from scipy import io
 
 '''
 알고싶은것 = '속도'
 
 관심있는 물리량: 상태변수 = x = {위치, 속도}
+                                       거리(위치)= 속도 * 시간 
 시스템모델 : x(k+1) = Ax(k) + w(k) , w(k) ~ N(0, Q)
   측정모델 :   z(k) = Hx(k) + v(k) , v(k) ~ N(0, R)
 '''
-
+# ---- 변수
 firstRun = True
-x, P = np.array([[0,0]]).transpose(), np.zeros((2,2)) # X : Previous State Variable Estimation, P : Error Covariance Estimation
-A, H = np.array([[0,0], [0,0]]), np.array([[0,0]])
-Q, R = np.array([[0,0], [0,0]]), 0
+x, P = np.array([[0,0]]).T, np.zeros((2,2)) # X : Previous State Variable Estimation, P : Error Covariance Estimation
+A, H = np.zeros((2,2)),     np.zeros((1,2))
+Q, R = np.zeros((2,2)), 0
 
 def DvKalman(z):
     global firstRun
     global A, Q, H, R
     global x, P
     if firstRun:
-        dt = 0.1
+        dt = 0.02
         A, Q = np.array([[1, dt], [0, 1]]), np.array([[1, 0], [0, 3]])
-        H, R = np.array([[1, 0]]),  np.array([10])
-
-        #x = np.array([0, 20]).transpose()
+        H, R = np.array([[0, 1]]),          np.array([10])
         x = np.array([0, 80]).T
         P = 5 * np.eye(2)
         firstRun = False
     else:
+        # Prediction
         x_pred = A@x                              # x_pred : State Variable Prediction
         P_pred = A@P@A.T + Q                      # Error Covariance Prediction
+        # Update
         K = (P_pred@H.T) @ inv(H@P_pred@H.T + R)  # K : Kalman Gain
         x = x_pred + K@(z - H@x_pred)             # Update State Variable Estimation
         P = P_pred - K@H@P_pred                   # Update Error Covariance Estimation
@@ -63,19 +64,20 @@ def DvKalman(z):
 #     Velp = 80 + w
 #     return z, Posp, Velp
 
-input_mat = io.loadmat('./02_SonarAlt.mat')
-def GetSonar(i):
+# 초음파 측정기로 측정한 거리
+input_mat = io.loadmat('./SonarAlt.mat')
+def getSonar(i):
     z = input_mat['sonarAlt'][0][i]  # (1, 1501)
     return z
 
 Nsamples = 500
-time = np.arange(0, Nsamples/10, 0.1)
+time = np.arange(0, Nsamples/50, 0.02)
 
 X_esti  = np.zeros([Nsamples, 2])
-Z_saved = np.zeros([Nsamples, 2])
+Z_saved = np.zeros([Nsamples,2])
 
 for i in range(Nsamples):
-    Z, pos_true, vel_true = getPosSensor()
+    Z, pos_true, vel_true = getSonar(i)
     pos, vel = DvKalman(Z)
 
     X_esti[i] = [pos, vel]
