@@ -6,7 +6,9 @@ from numpy.linalg import inv
 import matplotlib.pyplot as plt
 
 '''
-관심있는 물리량: 상태변수 = x = {위치, 속도}
+속도를 측정, 위치를 추정
+
+관심있는 물리량: 상태변수 = x = {위치, 속도} = {pos, vel} = {? ,측정} ={0, 1}
 시스템모델 : x(k+1) = Ax(k) + w(k) , w(k) ~ N(0, Q)
   측정모델 :   z(k) = Hx(k) + v(k) , v(k) ~ N(0, R)
 '''
@@ -26,7 +28,6 @@ def IntKalman(z):
         # H, R = np.array([[1, 0]]),  np.array([10])
         H, R = np.array([[0, 1]]),  np.array([10])
 
-        #x = np.array([0, 20]).transpose()
         x = np.array([0, 80]).T
         P = 5 * np.eye(2)
         firstRun = False
@@ -55,39 +56,40 @@ def getVel(): #getPosSensor():
     # z = Posp + Velp * dt + v  # Position measurement
     # Posp = z - v
     # Velp = 80 + w
-    
-    Velp = 80 + v
-    Posp = Posp + Velp * dt  # Position measurement
-    z = Velp
 
+    Posp = Posp + (Velp * dt)  # Position measurement
+    z = Velp
+    Velp = 80 + v
+    print(f"v=>{v}")
     return z, Posp, Velp
+
 
 time = np.arange(0, 10, 0.1)
 Nsamples = len(time)
 
 X_esti  = np.zeros([Nsamples, 2])
-Z_saved = np.zeros([Nsamples,2])
+Z_saved = np.zeros([Nsamples, 2])
 
 for i in range(Nsamples):
     Z, pos_true, vel_true = getVel()
     pos, vel = IntKalman(Z)
 
-    X_esti[i] = [pos, vel]
+    X_esti[i]  = [pos, vel]
     Z_saved[i] = [pos_true, vel_true]
 
 plt.figure()
-plt.plot(time, Z_saved[:,0], 'b.', label = 'Measurements')
-plt.plot(time, X_esti[:,0], 'r-', label='Kalman Filter')
+plt.plot(time, Z_saved[:,1], 'b.', label = 'Measurements')
+plt.plot(time, X_esti[:,1],  'r-', label='Kalman Filter')
 plt.legend(loc='upper left')
-plt.ylabel('Position [m]')
+plt.ylabel('Velocity [m/s]')
 plt.xlabel('Time [sec]')
 # plt.savefig('result/09_DvKalman-Position.png')
 
 plt.figure()
-plt.plot(time, Z_saved[:,1], 'b--', label='True Speed')
-plt.plot(time, X_esti[:,1], 'r-', label='Kalman Filter')
+plt.plot(time, Z_saved[:,0], 'b--', label='True Speed')
+plt.plot(time, X_esti[:,0], 'r-', label='Kalman Filter')
 plt.legend(loc='upper left')
-plt.ylabel('Velocity [m/s]')
+plt.ylabel('Position [m]')
 plt.xlabel('Time [sec]')
 #plt.savefig('result/09_DvKalman-Velocity.png')
 plt.show()
