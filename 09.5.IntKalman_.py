@@ -54,7 +54,9 @@ def getSonar(i):
     return z
 
 Nsamples = 1500
-time = np.arange(0, Nsamples/50, 0.02)
+# time = np.arange(0, Nsamples/50, 0.02)
+dt = 0.02
+time = np.arange(0, Nsamples*dt ,dt)
 
 X_esti_saved = np.zeros([Nsamples, 2])
 Z_meas_saved = np.zeros([Nsamples ])

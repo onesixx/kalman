@@ -11,8 +11,8 @@ import matplotlib.pyplot as plt
 측정된 위치로, 속도를 추정
 
 관심있는 물리량: 상태변수 = x = {위치, 속도} = {pos, vel} = {측정, ?} ={1, 0}
-시스템모델 : x(k+1) = Ax(k) + w(k) , w(k) ~ N(0, Q)
-  측정모델 :   x_meas(k) = Hx(k) + v(k) , v(k) ~ N(0, R)
+시스템모델 : x(k+1)    = Ax(k) + w(k) , w(k) ~ N(0, Q)
+  측정모델 : z(k) = Hx(k) + v(k) , v(k) ~ N(0, R)
 '''
 
 firstRun = True
@@ -21,7 +21,7 @@ P = np.zeros((2,2))      # P : Error Covariance Estimation
 A, H = np.array([[0,0], [0,0]]), np.array([[0,0]])
 Q, R = np.array([[0,0], [0,0]]), 0
 
-def DvKalman(x_meas):
+def DvKalman(z):
     global firstRun
     global A, Q, H, R
     global x, P
@@ -43,7 +43,7 @@ def DvKalman(x_meas):
         x_pred = A@x                              # x_pred : State Variable Prediction
         P_pred = A@P@A.T + Q                      # Error Covariance Prediction
         K = (P_pred@H.T) @ inv(H@P_pred@H.T + R)  # K : Kalman Gain
-        x = x_pred + K@(x_meas - H@x_pred)        # Update State Variable Estimation
+        x = x_pred + K@(z - H@x_pred)        # Update State Variable Estimation
         P = P_pred - K@H@P_pred                   # Update Error Covariance Estimation
     return x
 
@@ -61,11 +61,11 @@ def getPosSensor():
     w = 0 + 10 * np.random.normal()
     v = 0 + 10 * np.random.normal()
 
-    x_meas = posi_pred + (velo_pred * dt) + v  # Position measurement
+    z = posi_pred + (velo_pred * dt) + v  # Position measurement
 
-    posi_pred = x_meas - v
+    posi_pred = z - v
     velo_pred = 80 + w
-    return x_meas, posi_pred, velo_pred
+    return z, posi_pred, velo_pred
 
 time = np.arange(0, 10, 0.1)
 Nsamples = len(time)

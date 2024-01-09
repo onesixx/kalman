@@ -48,6 +48,10 @@ def TrackKalman(xm, ym):
 
     return xh, yh
 
+# plt.imshow(imageB)
+# plt.imshow(grayB)
+
+
 def GetBallPos(iimg=0):
     """Return measured position of ball by comparing with background image file.
         - References:
@@ -81,7 +85,8 @@ def GetBallPos(iimg=0):
 
     xpos_meas = xc + v  # x_pos_meas: measured position in x (observable).
     ypos_meas = yc + v  # y_pos_meas: measured position in y (observable).
-
+    print(f'xpos_meas={xpos_meas}, ypos_meas={ypos_meas}')
+    
     return np.array([xpos_meas, ypos_meas])
 
 
@@ -100,10 +105,10 @@ plt.figure()
 plt.plot(Xmsaved[:,0], Xmsaved[:,1], '*', label='Measured')
 plt.plot(Xhsaved[:,0], Xhsaved[:,1], 's', label='Kalman Filter')
 plt.legend(loc='upper left')
-plt.ylabel('Vertical [pixel]')
 plt.xlabel('Horizontal [pixel]')
-plt.ylim([0, 250])
 plt.xlim([0, 350])
+plt.ylabel('Vertical [pixel]')
+plt.ylim([0, 250])
 plt.gca().invert_yaxis()
 # plt.savefig('result/10_TrackerKalman.png')
 plt.show()
