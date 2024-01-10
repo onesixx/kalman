@@ -28,15 +28,15 @@ time = np.arange(0, n_samples*dt ,dt)
 
 EulerSaved = np.zeros([n_samples,3])
 for k in range(n_samples):
-    p,q,r = getAccel(k)
+    p,q,r = getGyro(k)
     # phi, theta, psi = eulerGyro(p,q,r, dt)
     EulerSaved[k] = [p, q, r]
 
-EulerSaved = np.zeros([n_samples,3])
+EulerSaved = np.zeros([n_samples,2])
 for k in range(n_samples):
-    p,q,r = getAccel(k)
-    phi, theta, psi = eulerGyro(p,q,r, dt)
-    EulerSaved[k] = [phi, theta, psi]
+    p,q,r = getGyro(k)
+    phi, theta = eulerGyro(p,q,r)
+    EulerSaved[k] = [phi, theta]
 
 '''
 roll  -> phi
